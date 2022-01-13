@@ -11,7 +11,19 @@ class Main extends StatefulWidget {
   State<Main> createState() => _MainState();
 }
 
-class _MainState extends State<Main> {
+class _MainState extends State<Main> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(seconds: 2),
+    vsync: this,
+  );
+  late final Animation<Offset> _offsetAnimation = Tween<Offset>(
+    begin: Offset.zero,
+    end: const Offset(0.0, 1.0),
+  ).animate(CurvedAnimation(
+    parent: _controller,
+    curve: Curves.elasticIn,
+  ));
+
   String _idValue = "";
   String _titleValue = "";
   String _taskValue = "";
@@ -25,6 +37,12 @@ class _MainState extends State<Main> {
   final TextEditingController _taskController = TextEditingController();
   final TextEditingController _detailsController = TextEditingController();
   late Future<Todos> futureTodos;
+
+  void refetchTodos() {
+    setState(() {
+      futureTodos = fetchTodos();
+    });
+  }
 
   @override
   void initState() {
@@ -111,9 +129,8 @@ class _MainState extends State<Main> {
                                             isDone: false,
                                             description: _detailsValue);
                                         createTodo(todo).then((value) => {
-                                              setState(() {
-                                                futureTodos = fetchTodos();
-                                              })
+                                              refetchTodos(),
+                                              Navigator.pop(context)
                                             });
                                         _idController.clear();
                                         _titleController.clear();
@@ -155,15 +172,20 @@ class _MainState extends State<Main> {
                         itemCount: todos.todos.length,
                         itemBuilder: (BuildContext context, int index) {
                           Todo todo = todos.todos[index];
-                          return Column(
-                            children: [
-                              TodoItem(
-                                isActive: todo.isDone,
-                                todo: todo.todo,
-                                description: todo.description,
-                              ),
-                              const SizedBox(height: 24),
-                            ],
+                          return SlideTransition(
+                            position: _offsetAnimation,
+                            child: Column(
+                              children: [
+                                TodoItem(
+                                  id: todo.id,
+                                  isActive: todo.isDone,
+                                  todo: todo.todo,
+                                  description: todo.description,
+                                  refetchTodos: refetchTodos,
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                            ),
                           );
                         });
                   } else if (snapshot.hasError) {

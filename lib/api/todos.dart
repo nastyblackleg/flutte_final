@@ -27,6 +27,30 @@ Future<http.Response> createTodo(Todo todo) {
   );
 }
 
+Future<http.Response> deleteTodo(id) {
+  return http.delete(
+    Uri.parse('http://192.168.1.4:8080/delete-todo/' + id.toString()),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+  );
+}
+
+Future<http.Response> updateTodo(Todo todo) {
+  return http.put(
+    Uri.parse('http://192.168.1.4:8080/update-todo'),
+    body: jsonEncode(<String, dynamic>{
+      'id': todo.id,
+      'todo': todo.todo,
+      'isDone': todo.isDone,
+      'description': todo.description,
+    }),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+  );
+}
+
 class Todo {
   final int id;
   final String todo;
