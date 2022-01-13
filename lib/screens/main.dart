@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:final_todo_app/api/todos.dart';
 import 'package:final_todo_app/widgets/todo_item.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +110,11 @@ class _MainState extends State<Main> {
                                             todo: _taskValue,
                                             isDone: false,
                                             description: _detailsValue);
-                                        createTodo(todo);
+                                        createTodo(todo).then((value) => {
+                                              setState(() {
+                                                futureTodos = fetchTodos();
+                                              })
+                                            });
                                         _idController.clear();
                                         _titleController.clear();
                                         _taskController.clear();
